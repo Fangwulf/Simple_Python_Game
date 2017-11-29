@@ -129,25 +129,7 @@ def game ():
                     del enemyObj[i]
                     del bulletObj[i]
 
-        # check for keyboard input
-        keys = pygame.key.get_pressed()
-        if keys[moveUpKey]: # move player up
-            heroy -= heroSpeed
-            if heroy < 0: # prevent player leaving screen upwards
-                heroy = 0
-        if keys[moveDownKey]: # move player down
-            heroy += heroSpeed
-            if (heroy + heroHeight) > windowHeight: # prevent player leaving screen down
-                heroy = windowHeight - heroHeight
-        if keys[moveLeftKey]:
-            herox -= heroSpeed
-            if herox < 0:
-                herox = 0
-        if keys[moveRightKey]:
-            herox += heroSpeed
-            if (herox + heroWidth) > windowWidth:
-                herox = windowWidth - heroWidth
-
+        playerMove(herox, heroy, heroWidth, heroHeight, windowWidth, windowHeight)
         window.blit(heroImg, (herox, heroy)) # draw player
 
         if keys[quitKey]: # exit game on key press
@@ -190,6 +172,26 @@ def offScreen (windowWidth, windowHeight, obj): # define when object is outside 
     screenRect = pygame.Rect(0, 0, windowWidth, windowHeight)
     objRect = pygame.Rect(obj['x'], obj['y'], obj['width'], obj['height'])
     return not screenRect.colliderect(objRect)
+
+def playerMove (herox, heroy, heroWidth, heroHeight, windowWidth, windowHeight):
+    # check for keyboard input
+    keys = pygame.key.get_pressed()
+    if keys[moveUpKey]: # move player up
+        heroy -= heroSpeed
+        if heroy < 0: # prevent player leaving screen upwards
+            heroy = 0
+    if keys[moveDownKey]: # move player down
+        heroy += heroSpeed
+        if (heroy + heroHeight) > windowHeight: # prevent player leaving screen down
+            heroy = windowHeight - heroHeight
+    if keys[moveLeftKey]:
+        herox -= heroSpeed
+        if herox < 0:
+            herox = 0
+    if keys[moveRightKey]:
+        herox += heroSpeed
+        if (herox + heroWidth) > windowWidth:
+            herox = windowWidth - heroWidth
 
 if __name__ == '__main__': # run main
     main()
