@@ -35,11 +35,11 @@ def main ():
     fpsClock = pygame.time.Clock()
 
     window = pygame.display.set_mode((windowWidth, windowHeight), 0, 32) # create game window
-    pygame.display.set_caption('Shooting Game') # set game window title
+    pygame.display.set_caption('assets/Shooting Game') # set game window title
 
-    enemyImg = pygame.image.load('enemy.png') # load enemy image file
-    bulletImg = pygame.image.load('bullet.png') # load bullet projectile image file
-    heroImg = pygame.image.load('hero.png') # load player image file
+    enemyImg = pygame.image.load('assets/enemy.png') # load enemy image file
+    bulletImg = pygame.image.load('assets/bullet.png') # load bullet projectile image file
+    heroImg = pygame.image.load('assets/hero.png') # load player image file
 
     while True: # run game
         game()
@@ -66,10 +66,9 @@ def game ():
 
     # main loop
     while True:
-
         window.fill(black) # window background
-
-        mousePos = pygame.mouse.get_pos()
+        mousePos = pygame.mouse.get_pos() # get mouse cursor position (x,y)
+        keys = pygame.key.get_pressed() # get pressed keyboard keys list
 
         bChangex = 0
         bChangey = 0
@@ -80,7 +79,6 @@ def game ():
             #budx, budy = budx / budist, budy / budist
             #bObj['x'] -= budx * bObj['speed']
             #bObj['y'] -= budy * bObj['speed']
-
             bVx = mousePos[0] - herox
             bVy = mousePos[1] - heroy
             vLength = math.sqrt(bVx**2 + bVy**2)
@@ -89,7 +87,6 @@ def game ():
             bObj['x'] += bVx
             bObj['y'] += bVy
 
-
         for eObj in enemyObj: # move enemy towards player
             endx, endy = eObj['x'] - herox, eObj['y'] - heroy
             endist = math.hypot(endx, endy)
@@ -97,7 +94,7 @@ def game ():
             eObj['x'] -= endx * eObj['speed']
             eObj['y'] -= endy * eObj['speed']
 
-        for bObj in bulletObj: # draw bullet(s)
+        for bObj in bulletObj: # draw bullet
             bObj['rect'] = pygame.Rect((bObj['x'], bObj['y'], bObj['width'], bObj['height']))
             window.blit(bulletImg, bObj['rect'])
 
@@ -129,7 +126,24 @@ def game ():
                     del enemyObj[i]
                     del bulletObj[i]
 
-        playerMove(herox, heroy, heroWidth, heroHeight, windowWidth, windowHeight)
+        # check for keyboard input
+        if keys[moveUpKey]: # move player up
+            heroy -= heroSpeed
+            if heroy < 0: # prevent player leaving screen upwards
+                heroy = 0
+        if keys[moveDownKey]: # move player down
+            heroy += heroSpeed
+            if (heroy + heroHeight) > windowHeight: # prevent player leaving screen down
+                heroy = windowHeight - heroHeight
+        if keys[moveLeftKey]: # move player left
+            herox -= heroSpeed
+            if herox < 0: # prevent player leaving screen left
+                herox = 0
+        if keys[moveRightKey]: # move player right
+            herox += heroSpeed
+            if (herox + heroWidth) > windowWidth: # prevent player leving screen right
+                herox = windowWidth - heroWidth
+
         window.blit(heroImg, (herox, heroy)) # draw player
 
         if keys[quitKey]: # exit game on key press
@@ -172,26 +186,6 @@ def offScreen (windowWidth, windowHeight, obj): # define when object is outside 
     screenRect = pygame.Rect(0, 0, windowWidth, windowHeight)
     objRect = pygame.Rect(obj['x'], obj['y'], obj['width'], obj['height'])
     return not screenRect.colliderect(objRect)
-
-def playerMove (herox, heroy, heroWidth, heroHeight, windowWidth, windowHeight):
-    # check for keyboard input
-    keys = pygame.key.get_pressed()
-    if keys[moveUpKey]: # move player up
-        heroy -= heroSpeed
-        if heroy < 0: # prevent player leaving screen upwards
-            heroy = 0
-    if keys[moveDownKey]: # move player down
-        heroy += heroSpeed
-        if (heroy + heroHeight) > windowHeight: # prevent player leaving screen down
-            heroy = windowHeight - heroHeight
-    if keys[moveLeftKey]:
-        herox -= heroSpeed
-        if herox < 0:
-            herox = 0
-    if keys[moveRightKey]:
-        herox += heroSpeed
-        if (herox + heroWidth) > windowWidth:
-            herox = windowWidth - heroWidth
 
 if __name__ == '__main__': # run main
     main()
