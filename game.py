@@ -29,7 +29,7 @@ moveRightKey = K_d
 enemiesSpawn = 1
 
 def main ():
-    global fpsClock, window, enemyImg, bulletImg, heroImg# global use variables
+    global fpsClock, window, enemyImg, bulletImg, heroImg # global use variables
 
     pygame.init() # initialize pygame
     fpsClock = pygame.time.Clock()
