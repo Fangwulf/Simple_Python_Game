@@ -72,14 +72,16 @@ def game ():
 
         mousePos = pg.mouse.get_pos()
 
+        bChangex = 0
+        bChangey = 0
+
         for bObj in bulletObj: # move bullet(s)
             #budx, budy = bObj['x'] - mousePos[0], bObj['y'] - mousePos[1]
             #budist = math.hypot(budx, budy)
             #budx, budy = budx / budist, budy / budist
             #bObj['x'] -= budx * bObj['speed']
             #bObj['y'] -= budy * bObj['speed']
-            bChangex = 0
-            bChangey = 0
+            
             bVx = mousePos[0] - herox
             bVy = mousePos[1] - heroy
             vLength = math.sqrt(bVx**2 + bVy**2)
@@ -157,7 +159,7 @@ def game ():
                 pg.quit()
                 sys.exit()
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 1: # create bullet on mouse click
-                bulletObj.append(shootBullet(herox, heroy))
+                bulletObj.append(shootBullet(herox, heroy, mousePos))
 
         pg.display.update() # update the window
         fpsClock.tick(FPS)
@@ -171,7 +173,7 @@ def spawnEnemy (enemyWidth, enemyHeight, windowx):
     en['speed'] = random.randint(1, 1)
     return en
     
-def shootBullet (herox, heroy): # define and store bullet parameters
+def shootBullet (herox, heroy, mousePos): # define and store bullet parameters
     bu = {}
     bu['width'] = bulletImg.get_width()
     bu['height'] = bulletImg.get_height()
