@@ -1,9 +1,9 @@
 ###########################################################################
-#   Shooting Game
+#   Simple Shooting Game
 #
 #   Programmed by Josh Follett 2017-11-07
 #
-#   Dependancies: Python 3.6 and Pygame 1.9.3
+#   Dependancies: Python 3 and Pygame 1.9.3
 #
 ###########################################################################
 
@@ -12,21 +12,22 @@ from pygame.locals import * # instead of typing pygame.locals.X everytime
 
 FPS = 60 # frames per second the screen updates
 
-windowWidth = 500 # set width of game window
-windowHeight = 500 # set height of game window
+WINDOW_WIDTH = 500 # set width of game window
+WINDOW_HEIGHT = 500 # set height of game window
 
 # defines RGB values for colors
-black = (0, 0, 0)
-white = (255, 255, 255)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
 
 # keyboard button assignments
-quitKey = K_ESCAPE
-moveUpKey = K_w
-moveDownKey = K_s
-moveLeftKey = K_a
-moveRightKey = K_d
+KEY_QUIT = K_ESCAPE
+KEY_UP = K_w
+KEY_DOWN = K_s
+KEY_LEFT = K_a
+KEY_RIGHT = K_d
 
-enemiesSpawn = 1
+# number of enemies to spawn
+NUM_ENEMIES = 1
 
 def main ():
     global fpsClock, window, enemyImg, bulletImg, heroImg # global use variables
@@ -34,8 +35,8 @@ def main ():
     pygame.init() # initialize pygame
     fpsClock = pygame.time.Clock()
 
-    window = pygame.display.set_mode((windowWidth, windowHeight), 0, 32) # create game window
-    pygame.display.set_caption('assets/Shooting Game') # set game window title
+    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), 0, 32) # create game window
+    pygame.display.set_caption('Simple Shooting Game') # set game window title
 
     enemyImg = pygame.image.load('assets/enemy.png') # load enemy image file
     bulletImg = pygame.image.load('assets/bullet.png') # load bullet projectile image file
@@ -54,99 +55,99 @@ def game ():
     enemyHeight = enemyImg.get_height()
 
     # starting x and y position of player
-    herox = 0
-    heroy = (windowHeight / 2) - (heroHeight / 2)
+    heroX = 0
+    heroY = (WINDOW_HEIGHT / 2) - (heroHeight / 2)
 
     # player speed
     heroSpeed = 5
 
     # stores objects
-    enemyObj = []
-    bulletObj = []
+    enemyObjs = []
+    bulletObjs = []
 
     # main loop
     while True:
-        window.fill(black) # window background
+        window.fill(BLACK) # window background
         mousePos = pygame.mouse.get_pos() # get mouse cursor position (x,y)
         keys = pygame.key.get_pressed() # get pressed keyboard keys list
 
         bChangex = 0
         bChangey = 0
 
-        for bObj in bulletObj: # move bullet(s)
+        for bObj in bulletObjs: # move bullet(s)
             #budx, budy = bObj['x'] - mousePos[0], bObj['y'] - mousePos[1]
             #budist = math.hypot(budx, budy)
             #budx, budy = budx / budist, budy / budist
             #bObj['x'] -= budx * bObj['speed']
             #bObj['y'] -= budy * bObj['speed']
-            bVx = mousePos[0] - herox
-            bVy = mousePos[1] - heroy
+            bVx = mousePos[0] - heroX
+            bVy = mousePos[1] - heroY
             vLength = math.sqrt(bVx**2 + bVy**2)
             bVx = (bVx / vLength) * 5
             bVy = (bVy / vLength) * 5
             bObj['x'] += bVx
             bObj['y'] += bVy
 
-        for eObj in enemyObj: # move enemy towards player
-            endx, endy = eObj['x'] - herox, eObj['y'] - heroy
+        for eObj in enemyObjs: # move enemy towards player
+            endx, endy = eObj['x'] - heroX, eObj['y'] - heroY
             endist = math.hypot(endx, endy)
             endx, endy = endx / endist, endy / endist
             eObj['x'] -= endx * eObj['speed']
             eObj['y'] -= endy * eObj['speed']
 
-        for bObj in bulletObj: # draw bullet
+        for bObj in bulletObjs: # draw bullet
             bObj['rect'] = pygame.Rect((bObj['x'], bObj['y'], bObj['width'], bObj['height']))
             window.blit(bulletImg, bObj['rect'])
 
-        for eObj in enemyObj: # draw enemy
+        for eObj in enemyObjs: # draw enemy
             eObj['rect'] = pygame.Rect((eObj['x'], eObj['y'], eObj['width'], eObj['height']))
             window.blit(enemyImg, eObj['rect'])
 
-        if len(enemyObj) < enemiesSpawn: # spawn new enemy
-            enemyObj.append(spawnEnemy(enemyWidth, enemyHeight, windowWidth))
+        if len(enemyObjs) < NUM_ENEMIES: # spawn new enemy
+            enemyObjs.append(spawnEnemy(enemyWidth, enemyHeight, WINDOW_WIDTH))
 
-        for i in range(len(bulletObj) -1, -1, -1): # delete bullet once outside game window
-            if offScreen(windowWidth, windowHeight, bulletObj[i]):
-                del bulletObj[i]
+        for i in range(len(bulletObjs) -1, -1, -1): # delete bullet once outside game window
+            if offScreen(WINDOW_WIDTH, WINDOW_HEIGHT, bulletObjs[i]):
+                del bulletObjs[i]
 
-        for i in range(len(enemyObj) -1, -1, -1): # delete enemy once outside game window
-            if offScreen(windowWidth, windowHeight, enemyObj[i]):
-                del enemyObj[i]
+        for i in range(len(enemyObjs) -1, -1, -1): # delete enemy once outside game window
+            if offScreen(WINDOW_WIDTH, WINDOW_HEIGHT, enemyObjs[i]):
+                del enemyObjs[i]
 
-        #for i in range(len(enemyObj) -1, -1, -1):
-            #enObj = enemyObj[i]
-            #buObj = bulletObj[i]
-            #if 'rect' in enObj and 'rect' in buObj:#bulletObj['rect'].colliderect(enObj['rect']):
-                #del enemyObj[i]
-        for eObj in enemyObj: # delete enemy on bullet collision
+        #for i in range(len(enemyObjs) -1, -1, -1):
+            #enObj = enemyObjs[i]
+            #buObj = bulletObjs[i]
+            #if 'rect' in enObj and 'rect' in buObj:#bulletObjs['rect'].colliderect(enObj['rect']):
+                #del enemyObjs[i]
+        for eObj in enemyObjs: # delete enemy on bullet collision
             enemyOb = pygame.Rect((eObj['x'], eObj['y'], eObj['width'], eObj['height']))
-            for bObj in bulletObj:
+            for bObj in bulletObjs:
                 bulletOb = pygame.Rect((bObj['x'], bObj['y'], bObj['width'], bObj['height']))
                 if bulletOb.colliderect(enemyOb):
-                    del enemyObj[i]
-                    del bulletObj[i]
+                    del enemyObjs[i]
+                    del bulletObjs[i]
 
         # check for keyboard input
-        if keys[moveUpKey]: # move player up
-            heroy -= heroSpeed
-            if heroy < 0: # prevent player leaving screen upwards
-                heroy = 0
-        if keys[moveDownKey]: # move player down
-            heroy += heroSpeed
-            if (heroy + heroHeight) > windowHeight: # prevent player leaving screen down
-                heroy = windowHeight - heroHeight
-        if keys[moveLeftKey]: # move player left
-            herox -= heroSpeed
-            if herox < 0: # prevent player leaving screen left
-                herox = 0
-        if keys[moveRightKey]: # move player right
-            herox += heroSpeed
-            if (herox + heroWidth) > windowWidth: # prevent player leving screen right
-                herox = windowWidth - heroWidth
+        if keys[KEY_UP]: # move player up
+            heroY -= heroSpeed
+            if heroY < 0: # prevent player leaving screen upwards
+                heroY = 0
+        if keys[KEY_DOWN]: # move player down
+            heroY += heroSpeed
+            if (heroY + heroHeight) > WINDOW_HEIGHT: # prevent player leaving screen down
+                heroY = WINDOW_HEIGHT - heroHeight
+        if keys[KEY_LEFT]: # move player left
+            heroX -= heroSpeed
+            if heroX < 0: # prevent player leaving screen left
+                heroX = 0
+        if keys[KEY_RIGHT]: # move player right
+            heroX += heroSpeed
+            if (heroX + heroWidth) > WINDOW_WIDTH: # prevent player leving screen right
+                heroX = WINDOW_WIDTH - heroWidth
 
-        window.blit(heroImg, (herox, heroy)) # draw player
+        window.blit(heroImg, (heroX, heroY)) # draw player
 
-        if keys[quitKey]: # exit game on key press
+        if keys[KEY_QUIT]: # exit game on key press
             pygame.quit()
             sys.exit()
         for event in pygame.event.get(): # exit game loop
@@ -154,26 +155,26 @@ def game ():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: # create bullet on mouse click
-                bulletObj.append(shootBullet(herox, heroy, mousePos))
+                bulletObjs.append(shootBullet(heroX, heroY, mousePos))
 
         pygame.display.update() # update the window
         fpsClock.tick(FPS)
 
-def spawnEnemy (enemyWidth, enemyHeight, windowWidth):
+def spawnEnemy (enemyWidth, enemyHeight, WINDOW_WIDTH):
     en = {}
     en['width'] = enemyImg.get_width()
     en['height'] = enemyImg.get_height()
-    en['x'] = windowWidth - en['width']
-    en['y'] = random.randint(0, (windowHeight - en['width']))
+    en['x'] = WINDOW_WIDTH - en['width']
+    en['y'] = random.randint(0, (WINDOW_HEIGHT - en['width']))
     en['speed'] = random.randint(1, 1)
     return en
 
-def shootBullet (herox, heroy, mousePos): # define and store bullet parameters
+def shootBullet (heroX, heroY, mousePos): # define and store bullet parameters
     bu = {}
     bu['width'] = bulletImg.get_width()
     bu['height'] = bulletImg.get_height()
-    bu['x'] = herox + heroWidth
-    bu['y'] = heroy + (heroHeight/2)
+    bu['x'] = heroX + heroWidth
+    bu['y'] = heroY + (heroHeight/2)
     bu['speed'] = 15 # bullet speed
     return bu
 
@@ -182,8 +183,8 @@ def shootBullet (herox, heroy, mousePos): # define and store bullet parameters
     #objRect = pygame.Rect(obj['x'], obj['y'], obj['width'], obj['height'])
     #return enemyRect.colliderect(objRect)
 
-def offScreen (windowWidth, windowHeight, obj): # define when object is outside game window
-    screenRect = pygame.Rect(0, 0, windowWidth, windowHeight)
+def offScreen (WINDOW_WIDTH, WINDOW_HEIGHT, obj): # define when object is outside game window
+    screenRect = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
     objRect = pygame.Rect(obj['x'], obj['y'], obj['width'], obj['height'])
     return not screenRect.colliderect(objRect)
 
