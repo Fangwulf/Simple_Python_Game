@@ -1,7 +1,7 @@
 ###########################################################################
 #   Simple Shooting Game
 #
-#   Programmed by Josh Follett 2017-11-07
+#   Programmed by Fangwulf 2017-11-07
 #
 #   Dependancies: Python 3 and Pygame 1.9.3
 #
