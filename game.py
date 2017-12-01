@@ -181,23 +181,23 @@ def game ():
 ###########################################################################
 # defines enemy spawn function
 def spawnEnemy (enemyWidth, enemyHeight, WINDOW_WIDTH):
-    en = {}
-    en['width'] = enemyImg.get_width()
-    en['height'] = enemyImg.get_height()
-    en['x'] = WINDOW_WIDTH - en['width']
-    en['y'] = random.randint(0, (WINDOW_HEIGHT - en['width']))
-    en['speed'] = random.randint(1, 3)
-    return en
+    enemy = {}
+    enemy['width'] = enemyImg.get_width()
+    enemy['height'] = enemyImg.get_height()
+    enemy['x'] = WINDOW_WIDTH - enemy['width']
+    enemy['y'] = random.randint(0, (WINDOW_HEIGHT - enemy['width']))
+    enemy['speed'] = random.randint(1, 3)
+    return enemy
 ###########################################################################
 # defines bullet spawn function
 def spawnBullet (playerX, playerY, mousePos):
-    bu = {}
-    bu['width'] = bulletImg.get_width()
-    bu['height'] = bulletImg.get_height()
-    bu['x'] = playerX + playerWidth
-    bu['y'] = playerY + (playerHeight/2)
-    bu['speed'] = 15
-    return bu
+    bullet = {}
+    bullet['width'] = bulletImg.get_width()
+    bullet['height'] = bulletImg.get_height()
+    bullet['x'] = playerX + playerWidth
+    bullet['y'] = playerY + (playerHeight/2)
+    bullet['speed'] = 15
+    return bullet
 ###########################################################################
 '''def bulletHit (enemyx, enemyy, enemyWidth, enemyHeight, obj):
     enemyRect = pygame.Rect(enemyx, enemyy, enemyWidth, enemyHeight)
