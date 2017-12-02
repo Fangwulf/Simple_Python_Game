@@ -76,8 +76,8 @@ def game ():
         # get pressed keyboard keys list
         keys = pygame.key.get_pressed()
         # initilaize bullet direction variables
-        bChangex = 0
-        bChangey = 0
+        '''bChangex = 0
+        bChangey = 0'''
         # move bullet(s)
         for bObj in bulletObjs:
             '''budx, budy = bObj['x'] - mousePos[0], bObj['y'] - mousePos[1]
@@ -85,13 +85,14 @@ def game ():
             budx, budy = budx / budist, budy / budist
             bObj['x'] -= budx * bObj['speed']
             bObj['y'] -= budy * bObj['speed']'''
-            bVx = mousePos[0] - playerX
+            '''bVx = mousePos[0] - playerX
             bVy = mousePos[1] - playerY
             vLength = math.sqrt(bVx**2 + bVy**2)
             bVx = (bVx / vLength) * 5
             bVy = (bVy / vLength) * 5
             bObj['x'] += bVx
-            bObj['y'] += bVy
+            bObj['y'] += bVy'''
+            bObj['x'] += bObj['speed']
         # move enemy towards player
         for eObj in enemyObjs:
             endx, endy = eObj['x'] - playerX, eObj['y'] - playerY
