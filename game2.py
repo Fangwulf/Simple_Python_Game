@@ -13,12 +13,12 @@ from pygame.locals import * # instead of typing pygame.locals.X everytime
 # frames per second the screen updates
 FPS = 60
 FPS_CLOCK = pygame.time.Clock()
-# set width of game window
-WINDOW_WIDTH = 500
-# set height of game window
-WINDOW_HEIGHT = 500
+# set width of game screen
+SCREEN_WIDTH = 500
+# set height of game screen
+SCREEN_HEIGHT = 500
 # set screen rect object
-SCREEN_RECT = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+SCREEN_RECT = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
 # defines RGB values for colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -34,11 +34,12 @@ NUM_ENEMIES = 1
 PLAYER_SPEED = 5
 ###########################################################################
 # classes
-class player (pygame.sprite.Sprite):
+class Player (pygame.sprite.Sprite):
     def __init__ (self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('assets/player.png')
         self.rect = self.image.get_rect
+        #self.rect = self.rect.move(0, 0)
     def update (self):
         # move player up
         if keys[KEY_UP]:
@@ -54,12 +55,12 @@ class player (pygame.sprite.Sprite):
         if keys[KEY_RIGHT]:
             self.rect = self.rect.move(PLAYER_SPEED, 0)
 
-        if not SCREEN_RECT.colliderect(self.rect):
-            self.rect = self.rect.move(0,0)
+        #if not SCREEN_RECT.colliderect(self.rect):
+            #self.rect = self.rect.move(0,0)
 
-        screen.blit(self.image, self.rect)
+        screen.blit(self.image, (0, 0))
 ###########################################################################
-class bullet (pygame.sprite.Sprite):
+'''class Bullet (pygame.sprite.Sprite):
     def __init__ (self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('assets/bullet.png')
@@ -68,22 +69,24 @@ class bullet (pygame.sprite.Sprite):
     def update (self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                window.blit(self.image, self.rect)
+                screen.blit(self.image, self.rect)'''
 ###########################################################################
-class enemy (pygame.sprite.Sprite):
+'''class enemy (pygame.sprite.Sprite):
     def __init__ (self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('assets/enemy.png')
-        self.rect = self.image.get_rect
+        self.rect = self.image.get_rect'''
 ###########################################################################
 def game ():
     pygame.init()
-    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), 0, 32)
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
     pygame.display.set_caption('Simple Shooting Game')
     while True:
-        window.fill(BLACK)
-
-        player.update(self)
+        screen.fill(BLACK)
+        all_sprites = pygame.sprite.Group()
+        player = Player()
+        all_sprites.add(player)
+        all_sprites.draw(screen)
 
         for event in pygame.event.get():
             # exit game loop
