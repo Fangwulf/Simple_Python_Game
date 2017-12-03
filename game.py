@@ -25,10 +25,13 @@ KEY_UP = K_w
 KEY_DOWN = K_s
 KEY_LEFT = K_a
 KEY_RIGHT = K_d
+KEY_SHOOT = K_SPACE
 # number of enemies to spawn
 NUM_ENEMIES = 1
 # player speed
 PLAYER_SPEED = 5
+ENEMY_SPEED_MIN = 1
+ENEMY_SPEED_MAX = 1
 ###########################################################################
 # defines main function
 def main ():
@@ -75,7 +78,6 @@ def game ():
         mousePos = pygame.mouse.get_pos()
         # get pressed keyboard keys list
         keys = pygame.key.get_pressed()
-        # initilaize bullet direction variables
         '''bChangex = 0
         bChangey = 0'''
         # move bullet(s)
@@ -100,6 +102,7 @@ def game ():
             endx, endy = endx / endist, endy / endist
             eObj['x'] -= endx * eObj['speed']
             eObj['y'] -= endy * eObj['speed']
+            #eObj['x'] -= eObj['speed']
         # draw bullet
         for bObj in bulletObjs:
             bObj['rect'] = pygame.Rect((bObj['x'], bObj['y'],
@@ -121,13 +124,14 @@ def game ():
         for i in range(len(enemyObjs) -1, -1, -1):
             if offScreen(WINDOW_WIDTH, WINDOW_HEIGHT, enemyObjs[i]):
                 del enemyObjs[i]
-        '''for i in range(len(enemyObjs) -1, -1, -1):
-            enObj = enemyObjs[i]
-            buObj = bulletObjs[i]
-            if 'rect' in enObj and bulletObjs['rect'].colliderect(enObj['rect']):
-                del enemyObjs[i]'''
         # delete enemy on bullet collision
-        for eObj in enemyObjs:
+        for i in range(len(enemyObjs) -1, -1, -1):
+            for x in range(len(bulletObjs) -1, -1, -1):
+                if bulletHit(enemyObjs[i], bulletObjs[x]):
+                    print(i)
+                    del enemyObjs[i]
+                    del bulletObjs[x]
+        '''for eObj in enemyObjs:
             enemyOb = pygame.Rect((eObj['x'], eObj['y'],
                 eObj['width'], eObj['height']))
             for bObj in bulletObjs:
@@ -135,7 +139,18 @@ def game ():
                     bObj['height']))
                 if bulletOb.colliderect(enemyOb):
                     del enemyObjs[i]
-                    del bulletObjs[i]
+                    del bulletObjs[i]'''
+        '''for i in range(len(enemyObjs) -1, -1, -1):
+            enObj = enemyObjs[i]
+            buObj = bulletObjs[i]'''
+        '''for eObj in enemyObjs:
+            enemyOb = pygame.Rect((eObj['x'], eObj['y'],
+                eObj['width'], eObj['height']))
+        for bObj in bulletObjs:
+            bulletOb = pygame.Rect((bObj['x'], bObj['y'],
+                bObj['width'], bObj['height']))
+            if 'rect' in enObj and bulletOb.colliderect(enemyOb):
+                del enemyObjs[i]'''
         # check for keyboard input
         # move player up
         if keys[KEY_UP]:
@@ -175,6 +190,9 @@ def game ():
             # create bullet on mouse click
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 bulletObjs.append(spawnBullet(playerX, playerY, mousePos))
+            if event.type == KEYDOWN:
+                if event.key == KEY_SHOOT:
+                    bulletObjs.append(spawnBullet(playerX, playerY, mousePos))
         # update the window
         pygame.display.update()
         # add tick to fpsClock
@@ -187,7 +205,7 @@ def spawnEnemy (enemyWidth, enemyHeight, WINDOW_WIDTH):
     enemy['height'] = enemyImg.get_height()
     enemy['x'] = WINDOW_WIDTH - enemy['width']
     enemy['y'] = random.randint(0, (WINDOW_HEIGHT - enemy['width']))
-    enemy['speed'] = random.randint(1, 3)
+    enemy['speed'] = random.randint(ENEMY_SPEED_MIN, ENEMY_SPEED_MAX)
     return enemy
 ###########################################################################
 # defines bullet spawn function
@@ -200,10 +218,10 @@ def spawnBullet (playerX, playerY, mousePos):
     bullet['speed'] = 15
     return bullet
 ###########################################################################
-'''def bulletHit (enemyx, enemyy, enemyWidth, enemyHeight, obj):
-    enemyRect = pygame.Rect(enemyx, enemyy, enemyWidth, enemyHeight)
-    objRect = pygame.Rect(obj['x'], obj['y'], obj['width'], obj['height'])
-    return enemyRect.colliderect(objRect)'''
+def bulletHit (obj1, obj2):
+    obj1Rect = pygame.Rect(obj1['x'], obj1['y'], obj1['width'], obj1['height'])
+    obj2Rect = pygame.Rect(obj2['x'], obj2['y'], obj2['width'], obj2['height'])
+    return obj1Rect.colliderect(obj2Rect)
 ###########################################################################
 # defines function to check if object is outside screen bounds
 def offScreen (WINDOW_WIDTH, WINDOW_HEIGHT, obj):
