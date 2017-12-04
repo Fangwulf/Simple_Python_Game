@@ -26,13 +26,13 @@ KEY_LEFT = K_a
 KEY_RIGHT = K_d
 KEY_SHOOT = K_SPACE
 # number of enemies to spawn
-NUM_ENEMIES = 1
+NUM_ENEMIES = 2
 # player values
 PLAYER_SPEED = 5
 PLAYER_HEALTH = 3
 # enemy values
 ENEMY_SPEED_MIN = 1
-ENEMY_SPEED_MAX = 1
+ENEMY_SPEED_MAX = 3
 ###########################################################################
 # defines main function
 def main ():
@@ -156,7 +156,7 @@ def game ():
             if 'rect' in enObj and bulletOb.colliderect(enemyOb):
                 del enemyObjs[i]'''
         # decrease player health if enemy collides with player
-        for i in range(len(enemyObjs)):
+        for i in range(len(enemyObjs) -1, -1, -1):
             enemyRect = pygame.Rect(enemyObjs[i]['x'], enemyObjs[i]['y'],
                 enemyWidth, enemyHeight)
             if playerRect.colliderect(enemyRect):
