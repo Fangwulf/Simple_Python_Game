@@ -12,9 +12,8 @@ from pygame.locals import * # instead of typing pygame.locals.X everytime
 ###########################################################################
 # frames per second the screen updates
 FPS = 60
-# set width of game window
+# set game window width and height
 WINDOW_WIDTH = 500
-# set height of game window
 WINDOW_HEIGHT = 500
 # defines RGB values for colors
 BLACK = (0, 0, 0)
@@ -28,8 +27,10 @@ KEY_RIGHT = K_d
 KEY_SHOOT = K_SPACE
 # number of enemies to spawn
 NUM_ENEMIES = 1
-# player speed
+# player values
 PLAYER_SPEED = 5
+PLAYER_HEALTH = 3
+# enemy values
 ENEMY_SPEED_MIN = 1
 ENEMY_SPEED_MAX = 1
 ###########################################################################
@@ -62,11 +63,14 @@ def game ():
     # dimensions of player image
     playerWidth = playerImg.get_width()
     playerHeight = playerImg.get_height()
+    # dimensions of enemy image
     enemyWidth = enemyImg.get_width()
     enemyHeight = enemyImg.get_height()
     # starting x and y position of player
     playerX = 0
     playerY = (WINDOW_HEIGHT / 2) - (playerHeight / 2)
+    playerHealth = PLAYER_HEALTH
+    score = 0
     # stores objects
     enemyObjs = []
     bulletObjs = []
@@ -78,6 +82,7 @@ def game ():
         mousePos = pygame.mouse.get_pos()
         # get pressed keyboard keys list
         keys = pygame.key.get_pressed()
+        playerRect = pygame.Rect(playerX, playerY, playerWidth, playerHeight)
         '''bChangex = 0
         bChangey = 0'''
         # move bullet(s)
@@ -102,7 +107,6 @@ def game ():
             endx, endy = endx / endist, endy / endist
             eObj['x'] -= endx * eObj['speed']
             eObj['y'] -= endy * eObj['speed']
-            #eObj['x'] -= eObj['speed']
         # draw bullet
         for bObj in bulletObjs:
             bObj['rect'] = pygame.Rect((bObj['x'], bObj['y'],
@@ -128,9 +132,9 @@ def game ():
         for i in range(len(enemyObjs) -1, -1, -1):
             for x in range(len(bulletObjs) -1, -1, -1):
                 if bulletHit(enemyObjs[i], bulletObjs[x]):
-                    print(i)
                     del enemyObjs[i]
                     del bulletObjs[x]
+                    score += 1
         '''for eObj in enemyObjs:
             enemyOb = pygame.Rect((eObj['x'], eObj['y'],
                 eObj['width'], eObj['height']))
@@ -151,6 +155,14 @@ def game ():
                 bObj['width'], bObj['height']))
             if 'rect' in enObj and bulletOb.colliderect(enemyOb):
                 del enemyObjs[i]'''
+        # decrease player health if enemy collides with player
+        for i in range(len(enemyObjs)):
+            enemyRect = pygame.Rect(enemyObjs[i]['x'], enemyObjs[i]['y'],
+                enemyWidth, enemyHeight)
+            if playerRect.colliderect(enemyRect):
+                print('ouch')
+                del enemyObjs[i]
+                playerHealth -= 1
         # check for keyboard input
         # move player up
         if keys[KEY_UP]:
@@ -187,7 +199,7 @@ def game ():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            # create bullet on mouse click
+            # create bullet on mouse click or button press
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 bulletObjs.append(spawnBullet(playerX, playerY, mousePos))
             if event.type == KEYDOWN:
