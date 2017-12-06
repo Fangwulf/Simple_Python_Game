@@ -25,7 +25,7 @@ WHITE = (255, 255, 255)
 NUM_ENEMIES = 2
 # player values
 PLAYER_SPEED = 5
-PLAYER_HEALTH_MAX = 3
+PLAYER_HEALTH_MAX = 99
 # enemy values
 ENEMY_SPEED_MIN = 1
 ENEMY_SPEED_MAX = 3
@@ -67,6 +67,7 @@ def game ():
     # starting x and y position of player
     playerX = 0
     playerY = (WINDOW_HEIGHT / 2) - (playerHeight / 2)
+    playerAngle = 0
     # assign player health
     playerHealth = PLAYER_HEALTH_MAX
     # assign score
@@ -80,9 +81,12 @@ def game ():
         window.fill(BLACK)
         # get pressed keyboard keys list
         keys = pygame.key.get_pressed()
+        mousePos = pygame.mouse.get_pos()
         # create player rectangle
         playerRect = pygame.Rect(playerX, playerY,
             playerWidth, playerHeight)
+        playerCenter = (playerX + (playerWidth / 2),
+            playerY + (playerHeight / 2))
         # draw score
         if (not gameOver) and startGame:
             scoreScreen(score)
@@ -96,7 +100,8 @@ def game ():
                 enemyX = enemy['x'] - playerX
                 enemyY = enemy['y'] - playerY
                 enemyDist = math.hypot(enemyX, enemyY)
-                enemyX, enemyY = enemyX / enemyDist, enemyY / enemyDist
+                enemyX = enemyX / enemyDist
+                enemyY = enemyY / enemyDist
                 enemy['x'] -= enemyX * enemy['speed']
                 enemy['y'] -= enemyY * enemy['speed']
         # draw bullet
@@ -104,12 +109,16 @@ def game ():
             bullet['rect'] = pygame.Rect((bullet['x'], bullet['y'],
                 bullet['width'], bullet['height']))
             window.blit(bulletImg, bullet['rect'])
-        # draw enemy
+        # draw enemy facing player
         if (not gameOver) and startGame:
             for enemy in enemyObjs:
-                enemy['rect'] = pygame.Rect((enemy['x'], enemy['y'],
-                    enemy['width'], enemy['height']))
-                window.blit(ENEMY_IMG, enemy['rect'])
+                enemyAngle = (360 - ((math.atan2(playerCenter[1] - enemy['y'],
+                    playerCenter[0] - enemy['x']) * 180) / math.pi))
+                enemyImgRot = pygame.transform.rotate(enemyImg,
+                    (enemyAngle + 180))
+                enemyRect = enemyImgRot.get_rect(center = (enemy['x'],
+                    enemy['y']))
+                window.blit(enemyImgRot, enemyRect)
         # replace deleted enemies
         while len(enemyObjs) < NUM_ENEMIES:
             enemyObjs.append(spawnEnemy(WINDOW_WIDTH))
@@ -170,8 +179,13 @@ def game ():
                 # prevent player leving screen right
                 if (playerX + playerWidth) > WINDOW_WIDTH:
                     playerX = WINDOW_WIDTH - playerWidth
+            # rotate player
+            playerAngle = (360 - ((math.atan2(mousePos[1] - playerY,
+                mousePos[0] - playerX) * 180) / math.pi))
+            playerImgRot = pygame.transform.rotate(playerImg, playerAngle)
+            playerRect = playerImgRot.get_rect(center = (playerCenter))
             # draw player
-            window.blit(playerImg, (playerX, playerY))
+            window.blit(playerImgRot, playerRect)
         # show start screen
         elif not startGame:
             startGameScreen()
@@ -198,8 +212,10 @@ def game ():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            # create bullet on button press
+            # create bullet on button press or mouse click
             if (not gameOver) and startGame:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    bulletObjs.append(spawnBullet(playerX, playerY))
                 if event.type == KEYDOWN:
                     if event.key == K_SPACE:
                         bulletObjs.append(spawnBullet(playerX, playerY))
