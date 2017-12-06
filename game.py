@@ -17,7 +17,7 @@ FPS_CLOCK = pygame.time.Clock()
 # set game window width and height
 WINDOW_WIDTH = 500
 WINDOW_HEIGHT = 500
-WINDOw_RECT = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+WINDOW_RECT = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
 # defines RGB values for colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -115,31 +115,24 @@ def game ():
             enemyObjs.append(spawnEnemy(WINDOW_WIDTH))
         # delete bullet once outside game window
         for i in range(len(bulletObjs) -1, -1, -1):
-            if offScreen(WINDOW_WIDTH, WINDOW_HEIGHT, bulletObjs[i]):
+            if not collision(WINDOW_RECT, bulletObjs[i]['rect']):
                 del bulletObjs[i]
         # delete enemy once outside game window
         for i in range(len(enemyObjs) -1, -1, -1):
-            if offScreen(WINDOW_WIDTH, WINDOW_HEIGHT, enemyObjs[i]):
+            if not collision(WINDOW_RECT, enemyObjs[i]['rect']):
                 del enemyObjs[i]
         # delete enemy on bullet collision
-        '''for n in range(len(bulletObjs) -1, -1, -1):
-            for i in range(len(enemyObjs) -1, -1, -1):
-                if bulletHit(enemyObjs[i], bulletObjs[n]):
-                    del enemyObjs[i]
-                    del bulletObjs[n]
-                    score += 1'''
-        '''for i in range(len(bulletObjs) -1, -1, -1):
-            bulletObj = bulletObjs[i]
-            if 'rect' in enemyObj and enemyObjs[i]['rect'].colliderect(bulletObj['rect']):
-                del enemyObjs[i]
-                score +=1'''
         for n in range(len(bulletObjs) -1, -1, -1):
             bulletObj = bulletObjs[n]
             for i in range(len(enemyObjs) -1, -1, -1):
                 enemyObj = enemyObjs[i]
                 if collision(bulletObj['rect'], enemyObj['rect']):
-                    del enemyObjs[i]
-                    del bulletObjs[n]
+                    try:
+                        del enemyObjs[i]
+                        del bulletObjs[n]
+                    except:
+                        print('Collision exception!')
+                        pass
                     score +=1
         # decrease player health if enemy collides with player
         for i in range(len(enemyObjs) -1, -1, -1):
@@ -148,6 +141,7 @@ def game ():
             if playerRect.colliderect(enemyRect):
                 del enemyObjs[i]
                 playerHealth -= 1
+        # set game over if player looses all health
         if playerHealth <= 0:
             gameOver = True
         # check for keyboard input
@@ -178,9 +172,11 @@ def game ():
                     playerX = WINDOW_WIDTH - playerWidth
             # draw player
             window.blit(playerImg, (playerX, playerY))
+        # show start screen
         elif not startGame:
             startGameScreen()
-        else:
+        # show game over screen
+        elif gameOver:
             gameOverScreen(score)
         # start game
         if keys[K_RETURN] and not startGame:
@@ -196,6 +192,7 @@ def game ():
         if keys[K_ESCAPE]:
             pygame.quit()
             sys.exit()
+        # scan pygame events
         for event in pygame.event.get():
             # exit game loop
             if event.type == QUIT:
@@ -239,14 +236,7 @@ def spawnBullet (playerX, playerY):
 def collision (rect1, rect2):
     return rect1.colliderect(rect2)
 ###########################################################################
-# defines function to check if object is outside screen bounds, takes
-#   window width, height, and object if object has x, y, width, height
-def offScreen (WINDOW_WIDTH, WINDOW_HEIGHT, obj):
-    screenRect = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
-    objRect = pygame.Rect(obj['x'], obj['y'],
-        obj['width'], obj['height'])
-    return not screenRect.colliderect(objRect)
-###########################################################################
+# defines screen that shows at start
 def startGameScreen ():
     startText1 = textFont.render('Simple Shooter Game', True, WHITE)
     startRect1 = startText1.get_rect()
@@ -267,7 +257,7 @@ def startGameScreen ():
     window.blit(startText4, startRect4)
     return
 ###########################################################################
-# defines game over screen
+# defines game over screen, takes score
 def gameOverScreen (score):
     gameOverText1 = textFont.render('GAME OVER', True, WHITE)
     gameOverRect1 = gameOverText1.get_rect()
