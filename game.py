@@ -12,36 +12,31 @@ from pygame.locals import * # instead of typing pygame.locals.X everytime
 ###########################################################################
 # frames per second the screen updates
 FPS = 60
+# create clock for FPS
+FPS_CLOCK = pygame.time.Clock()
 # set game window width and height
 WINDOW_WIDTH = 500
 WINDOW_HEIGHT = 500
+WINDOw_RECT = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
 # defines RGB values for colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-# keyboard button assignments
-KEY_QUIT = K_ESCAPE
-KEY_UP = K_w
-KEY_DOWN = K_s
-KEY_LEFT = K_a
-KEY_RIGHT = K_d
-KEY_SHOOT = K_SPACE
 # number of enemies to spawn
 NUM_ENEMIES = 2
 # player values
 PLAYER_SPEED = 5
-PLAYER_HEALTH = 3
+PLAYER_HEALTH_MAX = 3
 # enemy values
 ENEMY_SPEED_MIN = 1
 ENEMY_SPEED_MAX = 3
+ENEMY_IMG = pygame.image.load('assets/enemy.png')
 ###########################################################################
 # defines main function
 def main ():
     # global use variables
-    global fpsClock, window, enemyImg, bulletImg, playerImg
+    global window, enemyImg, bulletImg, playerImg, textFont, textFontSmall
     # initialize pygame
     pygame.init()
-    # create clock for FPS
-    fpsClock = pygame.time.Clock()
     # create game window
     window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), 0, 32)
     # set game window title
@@ -52,6 +47,9 @@ def main ():
     bulletImg = pygame.image.load('assets/bullet.png')
     # load player image file
     playerImg = pygame.image.load('assets/player.png')
+    # creates text font
+    textFont = pygame.font.Font('freesansbold.ttf', 32)
+    textFontSmall = pygame.font.Font('freesansbold.ttf', 20)
     # runs game function
     while True:
         game()
@@ -60,16 +58,18 @@ def main ():
 def game ():
     # global use variables
     global playerWidth, playerHeight
+    # assign game screen boolean
+    startGame = False
+    gameOver = False
     # dimensions of player image
     playerWidth = playerImg.get_width()
     playerHeight = playerImg.get_height()
-    # dimensions of enemy image
-    enemyWidth = enemyImg.get_width()
-    enemyHeight = enemyImg.get_height()
     # starting x and y position of player
     playerX = 0
     playerY = (WINDOW_HEIGHT / 2) - (playerHeight / 2)
-    playerHealth = PLAYER_HEALTH
+    # assign player health
+    playerHealth = PLAYER_HEALTH_MAX
+    # assign score
     score = 0
     # stores objects
     enemyObjs = []
@@ -78,48 +78,41 @@ def game ():
     while True:
         # game window background
         window.fill(BLACK)
-        # get mouse cursor position [x,y]
-        mousePos = pygame.mouse.get_pos()
         # get pressed keyboard keys list
         keys = pygame.key.get_pressed()
-        playerRect = pygame.Rect(playerX, playerY, playerWidth, playerHeight)
-        '''bChangex = 0
-        bChangey = 0'''
+        # create player rectangle
+        playerRect = pygame.Rect(playerX, playerY,
+            playerWidth, playerHeight)
+        # draw score
+        if (not gameOver) and startGame:
+            scoreScreen(score)
+            healthScreen(playerHealth)
         # move bullet(s)
-        for bObj in bulletObjs:
-            '''budx, budy = bObj['x'] - mousePos[0], bObj['y'] - mousePos[1]
-            budist = math.hypot(budx, budy)
-            budx, budy = budx / budist, budy / budist
-            bObj['x'] -= budx * bObj['speed']
-            bObj['y'] -= budy * bObj['speed']'''
-            '''bVx = mousePos[0] - playerX
-            bVy = mousePos[1] - playerY
-            vLength = math.sqrt(bVx**2 + bVy**2)
-            bVx = (bVx / vLength) * 5
-            bVy = (bVy / vLength) * 5
-            bObj['x'] += bVx
-            bObj['y'] += bVy'''
-            bObj['x'] += bObj['speed']
+        for bullet in bulletObjs:
+            bullet['x'] += bullet['speed']
         # move enemy towards player
-        for eObj in enemyObjs:
-            endx, endy = eObj['x'] - playerX, eObj['y'] - playerY
-            endist = math.hypot(endx, endy)
-            endx, endy = endx / endist, endy / endist
-            eObj['x'] -= endx * eObj['speed']
-            eObj['y'] -= endy * eObj['speed']
+        if  (not gameOver) and startGame:
+            for enemy in enemyObjs:
+                enemyX = enemy['x'] - playerX
+                enemyY = enemy['y'] - playerY
+                enemyDist = math.hypot(enemyX, enemyY)
+                enemyX, enemyY = enemyX / enemyDist, enemyY / enemyDist
+                enemy['x'] -= enemyX * enemy['speed']
+                enemy['y'] -= enemyY * enemy['speed']
         # draw bullet
-        for bObj in bulletObjs:
-            bObj['rect'] = pygame.Rect((bObj['x'], bObj['y'],
-                bObj['width'], bObj['height']))
-            window.blit(bulletImg, bObj['rect'])
+        for bullet in bulletObjs:
+            bullet['rect'] = pygame.Rect((bullet['x'], bullet['y'],
+                bullet['width'], bullet['height']))
+            window.blit(bulletImg, bullet['rect'])
         # draw enemy
-        for eObj in enemyObjs:
-            eObj['rect'] = pygame.Rect((eObj['x'], eObj['y'],
-                eObj['width'], eObj['height']))
-            window.blit(enemyImg, eObj['rect'])
+        if (not gameOver) and startGame:
+            for enemy in enemyObjs:
+                enemy['rect'] = pygame.Rect((enemy['x'], enemy['y'],
+                    enemy['width'], enemy['height']))
+                window.blit(ENEMY_IMG, enemy['rect'])
         # replace deleted enemies
-        if len(enemyObjs) < NUM_ENEMIES:
-            enemyObjs.append(spawnEnemy(enemyWidth, enemyHeight, WINDOW_WIDTH))
+        while len(enemyObjs) < NUM_ENEMIES:
+            enemyObjs.append(spawnEnemy(WINDOW_WIDTH))
         # delete bullet once outside game window
         for i in range(len(bulletObjs) -1, -1, -1):
             if offScreen(WINDOW_WIDTH, WINDOW_HEIGHT, bulletObjs[i]):
@@ -129,69 +122,78 @@ def game ():
             if offScreen(WINDOW_WIDTH, WINDOW_HEIGHT, enemyObjs[i]):
                 del enemyObjs[i]
         # delete enemy on bullet collision
-        for i in range(len(enemyObjs) -1, -1, -1):
-            for x in range(len(bulletObjs) -1, -1, -1):
-                if bulletHit(enemyObjs[i], bulletObjs[x]):
+        '''for n in range(len(bulletObjs) -1, -1, -1):
+            for i in range(len(enemyObjs) -1, -1, -1):
+                if bulletHit(enemyObjs[i], bulletObjs[n]):
                     del enemyObjs[i]
-                    del bulletObjs[x]
-                    score += 1
-        '''for eObj in enemyObjs:
-            enemyOb = pygame.Rect((eObj['x'], eObj['y'],
-                eObj['width'], eObj['height']))
-            for bObj in bulletObjs:
-                bulletOb = pygame.Rect((bObj['x'], bObj['y'], bObj['width'],
-                    bObj['height']))
-                if bulletOb.colliderect(enemyOb):
+                    del bulletObjs[n]
+                    score += 1'''
+        '''for i in range(len(bulletObjs) -1, -1, -1):
+            bulletObj = bulletObjs[i]
+            if 'rect' in enemyObj and enemyObjs[i]['rect'].colliderect(bulletObj['rect']):
+                del enemyObjs[i]
+                score +=1'''
+        for n in range(len(bulletObjs) -1, -1, -1):
+            bulletObj = bulletObjs[n]
+            for i in range(len(enemyObjs) -1, -1, -1):
+                enemyObj = enemyObjs[i]
+                if collision(bulletObj['rect'], enemyObj['rect']):
                     del enemyObjs[i]
-                    del bulletObjs[i]'''
-        '''for i in range(len(enemyObjs) -1, -1, -1):
-            enObj = enemyObjs[i]
-            buObj = bulletObjs[i]'''
-        '''for eObj in enemyObjs:
-            enemyOb = pygame.Rect((eObj['x'], eObj['y'],
-                eObj['width'], eObj['height']))
-        for bObj in bulletObjs:
-            bulletOb = pygame.Rect((bObj['x'], bObj['y'],
-                bObj['width'], bObj['height']))
-            if 'rect' in enObj and bulletOb.colliderect(enemyOb):
-                del enemyObjs[i]'''
+                    del bulletObjs[n]
+                    score +=1
         # decrease player health if enemy collides with player
         for i in range(len(enemyObjs) -1, -1, -1):
             enemyRect = pygame.Rect(enemyObjs[i]['x'], enemyObjs[i]['y'],
-                enemyWidth, enemyHeight)
+                enemyObjs[i]['width'], enemyObjs[i]['height'])
             if playerRect.colliderect(enemyRect):
-                print('ouch')
                 del enemyObjs[i]
                 playerHealth -= 1
+        if playerHealth <= 0:
+            gameOver = True
         # check for keyboard input
         # move player up
-        if keys[KEY_UP]:
-            playerY -= PLAYER_SPEED
-            # prevent player leaving screen upwards
-            if playerY < 0:
-                playerY = 0
-        # move player down
-        if keys[KEY_DOWN]:
-            playerY += PLAYER_SPEED
-            # prevent player leaving screen down
-            if (playerY + playerHeight) > WINDOW_HEIGHT:
-                playerY = WINDOW_HEIGHT - playerHeight
-        # move player left
-        if keys[KEY_LEFT]:
-            playerX -= PLAYER_SPEED
-            # prevent player leaving screen left
-            if playerX < 0:
-                playerX = 0
-        # move player right
-        if keys[KEY_RIGHT]:
-            playerX += PLAYER_SPEED
-            # prevent player leving screen right
-            if (playerX + playerWidth) > WINDOW_WIDTH:
-                playerX = WINDOW_WIDTH - playerWidth
-        # draw player
-        window.blit(playerImg, (playerX, playerY))
+        if (not gameOver) and startGame:
+            if keys[K_UP] or keys[K_w]:
+                playerY -= PLAYER_SPEED
+                # prevent player leaving screen upwards
+                if playerY < 0:
+                    playerY = 0
+            # move player down
+            if keys[K_DOWN] or keys[K_s]:
+                playerY += PLAYER_SPEED
+                # prevent player leaving screen down
+                if (playerY + playerHeight) > WINDOW_HEIGHT:
+                    playerY = WINDOW_HEIGHT - playerHeight
+            # move player left
+            if keys[K_LEFT] or keys[K_a]:
+                playerX -= PLAYER_SPEED
+                # prevent player leaving screen left
+                if playerX < 0:
+                    playerX = 0
+            # move player right
+            if keys[K_RIGHT] or keys[K_d]:
+                playerX += PLAYER_SPEED
+                # prevent player leving screen right
+                if (playerX + playerWidth) > WINDOW_WIDTH:
+                    playerX = WINDOW_WIDTH - playerWidth
+            # draw player
+            window.blit(playerImg, (playerX, playerY))
+        elif not startGame:
+            startGameScreen()
+        else:
+            gameOverScreen(score)
+        # start game
+        if keys[K_RETURN] and not startGame:
+            startGame = True
+        # restart game after game over
+        if keys[K_RETURN] and gameOver:
+            playerX = 0
+            playerY = (WINDOW_HEIGHT / 2) - (playerHeight / 2)
+            playerHealth = PLAYER_HEALTH_MAX
+            score = 0
+            gameOver = False
         # exit game on key press
-        if keys[KEY_QUIT]:
+        if keys[K_ESCAPE]:
             pygame.quit()
             sys.exit()
         for event in pygame.event.get():
@@ -199,47 +201,111 @@ def game ():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            # create bullet on mouse click or button press
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                bulletObjs.append(spawnBullet(playerX, playerY, mousePos))
-            if event.type == KEYDOWN:
-                if event.key == KEY_SHOOT:
-                    bulletObjs.append(spawnBullet(playerX, playerY, mousePos))
+            # create bullet on button press
+            if (not gameOver) and startGame:
+                if event.type == KEYDOWN:
+                    if event.key == K_SPACE:
+                        bulletObjs.append(spawnBullet(playerX, playerY))
         # update the window
         pygame.display.update()
-        # add tick to fpsClock
-        fpsClock.tick(FPS)
+        # add tick to FPS_CLOCK
+        FPS_CLOCK.tick(FPS)
 ###########################################################################
-# defines enemy spawn function
-def spawnEnemy (enemyWidth, enemyHeight, WINDOW_WIDTH):
+# defines enemy spawn function, takes width of game window
+def spawnEnemy (WINDOW_WIDTH):
     enemy = {}
-    enemy['width'] = enemyImg.get_width()
-    enemy['height'] = enemyImg.get_height()
+    enemy['width'] = ENEMY_IMG.get_width()
+    enemy['height'] = ENEMY_IMG.get_height()
     enemy['x'] = WINDOW_WIDTH - enemy['width']
     enemy['y'] = random.randint(0, (WINDOW_HEIGHT - enemy['width']))
     enemy['speed'] = random.randint(ENEMY_SPEED_MIN, ENEMY_SPEED_MAX)
+    enemy['rect'] = pygame.Rect(enemy['x'], enemy['y'],
+        enemy['width'], enemy['height'] )
     return enemy
 ###########################################################################
-# defines bullet spawn function
-def spawnBullet (playerX, playerY, mousePos):
+# defines bullet spawn function, takes player x and y
+def spawnBullet (playerX, playerY):
     bullet = {}
     bullet['width'] = bulletImg.get_width()
     bullet['height'] = bulletImg.get_height()
     bullet['x'] = playerX + playerWidth
     bullet['y'] = playerY + (playerHeight/2)
     bullet['speed'] = 15
+    bullet['rect'] = pygame.Rect(bullet['x'], bullet['y'],
+        bullet['width'], bullet['height'] )
     return bullet
 ###########################################################################
-def bulletHit (obj1, obj2):
-    obj1Rect = pygame.Rect(obj1['x'], obj1['y'], obj1['width'], obj1['height'])
-    obj2Rect = pygame.Rect(obj2['x'], obj2['y'], obj2['width'], obj2['height'])
-    return obj1Rect.colliderect(obj2Rect)
+# defines object collision, takes two object rect attributes
+def collision (rect1, rect2):
+    return rect1.colliderect(rect2)
 ###########################################################################
-# defines function to check if object is outside screen bounds
+# defines function to check if object is outside screen bounds, takes
+#   window width, height, and object if object has x, y, width, height
 def offScreen (WINDOW_WIDTH, WINDOW_HEIGHT, obj):
     screenRect = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
-    objRect = pygame.Rect(obj['x'], obj['y'], obj['width'], obj['height'])
+    objRect = pygame.Rect(obj['x'], obj['y'],
+        obj['width'], obj['height'])
     return not screenRect.colliderect(objRect)
+###########################################################################
+def startGameScreen ():
+    startText1 = textFont.render('Simple Shooter Game', True, WHITE)
+    startRect1 = startText1.get_rect()
+    startRect1.center = (WINDOW_WIDTH / 2, (WINDOW_HEIGHT / 2) - 100)
+    startText2 = textFont.render('WASD or ARROW keys move.',
+        True, WHITE)
+    startRect2 = startText2.get_rect()
+    startRect2.center = (WINDOW_WIDTH / 2, (WINDOW_HEIGHT / 2) - 50)
+    startText3 = textFont.render('SPACE key shoots.', True, WHITE)
+    startRect3 = startText3.get_rect()
+    startRect3.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+    startText4 = textFont.render('Press ENTER to start.', True, WHITE)
+    startRect4 = startText4.get_rect()
+    startRect4.center = (WINDOW_WIDTH / 2, (WINDOW_HEIGHT / 2) + 50)
+    window.blit(startText1, startRect1)
+    window.blit(startText2, startRect2)
+    window.blit(startText3, startRect3)
+    window.blit(startText4, startRect4)
+    return
+###########################################################################
+# defines game over screen
+def gameOverScreen (score):
+    gameOverText1 = textFont.render('GAME OVER', True, WHITE)
+    gameOverRect1 = gameOverText1.get_rect()
+    gameOverRect1.center = (WINDOW_WIDTH / 2, (WINDOW_HEIGHT / 2) - 100)
+    gameOverText2 = textFont.render(('Your final score is ' +
+        str(score) + '.'), True, WHITE)
+    gameOverRect2 = gameOverText2.get_rect()
+    gameOverRect2.center = (WINDOW_WIDTH / 2, (WINDOW_HEIGHT / 2) - 50)
+    gameOverText3 = textFont.render('Press ENTER to restart.', True, WHITE)
+    gameOverRect3 = gameOverText3.get_rect()
+    gameOverRect3.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+    gameOverText4 = textFont.render('Press ESCAPE to exit.', True, WHITE)
+    gameOverRect4 = gameOverText4.get_rect()
+    gameOverRect4.center = (WINDOW_WIDTH / 2, (WINDOW_HEIGHT / 2) + 50)
+    window.blit(gameOverText1, gameOverRect1)
+    window.blit(gameOverText2, gameOverRect2)
+    window.blit(gameOverText3, gameOverRect3)
+    window.blit(gameOverText4, gameOverRect4)
+    return
+###########################################################################
+# defines score box
+def scoreScreen (score):
+    scoreText = textFontSmall.render(('Score: ' + str(score)),
+        True, WHITE)
+    scoreRect = scoreText.get_rect()
+    scoreRect.x = 5
+    scoreRect.y = 5
+    window.blit(scoreText, scoreRect)
+    return
+###########################################################################
+# definse health text box
+def healthScreen (playerHealth):
+    healthText = textFontSmall.render(('Health: ' + str(playerHealth)),
+        True, WHITE)
+    healthRect = healthText.get_rect()
+    healthRect.x = 5
+    healthRect.y = 30
+    window.blit(healthText, healthRect)
 ###########################################################################
 # run main function
 if __name__ == '__main__':
