@@ -5,7 +5,8 @@
 #
 #   Dependancies: Python 3.6 and Pygame 1.9.3
 #
-#   Description: Simple game where the player can aim and shoot at enemies
+#   Description: Simple game where the player can aim and shoot at
+#       enemies that spawn endlessly
 ###########################################################################
 # import needed modules
 import pygame, sys, random, time, math
@@ -94,11 +95,12 @@ def game ():
             scoreScreen(score)
             healthScreen(playerHealth)
         # move bullet(s)
-        for bullet in bulletObjs:
-            bullet['x'] += bullet['moveX'] * 2
-            bullet['y'] += bullet['moveY'] * 2
-            bullet['rect'] = pygame.Rect((bullet['x'], bullet['y'],
-                bullet['width'], bullet['height']))
+        if  (not gameOver) and startGame:
+            for bullet in bulletObjs:
+                bullet['x'] += bullet['moveX'] * 2
+                bullet['y'] += bullet['moveY'] * 2
+                bullet['rect'] = pygame.Rect((bullet['x'], bullet['y'],
+                    bullet['width'], bullet['height']))
         # move enemy towards player
         if  (not gameOver) and startGame:
             for enemy in enemyObjs:
@@ -205,10 +207,12 @@ def game ():
             startGame = True
         # restart game after game over
         if keys[K_RETURN] and gameOver:
-            playerX = 0
+            playerX = (WINDOW_WIDTH / 2) - (playerWidth / 2)
             playerY = (WINDOW_HEIGHT / 2) - (playerHeight / 2)
             playerHealth = PLAYER_HEALTH_MAX
             score = 0
+            enemyObjs = []
+            bulletObjs = []
             gameOver = False
         # exit game on key press
         if keys[K_ESCAPE]:
