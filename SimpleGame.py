@@ -151,7 +151,7 @@ def game ():
                     except:
                         print('Collision exception!')
                         pass
-                    score +=1
+                    score += 1
         # decrease player health if enemy collides with player
         for i in range(len(enemyObjs) -1, -1, -1):
             enemyRect = pygame.Rect(enemyObjs[i]['x'], enemyObjs[i]['y'],
