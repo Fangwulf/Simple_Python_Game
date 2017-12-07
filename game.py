@@ -31,7 +31,7 @@ NUM_ENEMIES_MAX = 5
 PLAYER_SPEED = 5
 PLAYER_HEALTH_MAX = 3
 # enemy values
-ENEMY_SPEED_MIN = 2
+ENEMY_SPEED_MIN = 1
 ENEMY_SPEED_MAX = 5
 # load image files
 ENEMY_IMG = pygame.image.load('assets/enemy.png')
