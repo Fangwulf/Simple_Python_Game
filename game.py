@@ -93,7 +93,11 @@ def game ():
             healthScreen(playerHealth)
         # move bullet(s)
         for bullet in bulletObjs:
-            bullet['x'] += bullet['speed']
+            #bullet['x'] += bullet['speed']
+            bullet['x'] += bullet['moveX']
+            bullet['y'] += bullet['moveY']
+            bullet['rect'] = pygame.Rect((bullet['x'], bullet['y'],
+                bullet['width'], bullet['height']))
         # move enemy towards player
         if  (not gameOver) and startGame:
             for enemy in enemyObjs:
@@ -106,9 +110,10 @@ def game ():
                 enemy['y'] -= enemyY * enemy['speed']
         # draw bullet
         for bullet in bulletObjs:
-            bullet['rect'] = pygame.Rect((bullet['x'], bullet['y'],
-                bullet['width'], bullet['height']))
-            window.blit(bulletImg, bullet['rect'])
+            #bullet['rect'] = pygame.Rect((bullet['x'], bullet['y'],
+                #bullet['width'], bullet['height']))
+
+            window.blit(bullet['image'], bullet['rect'])
         # draw enemy facing player
         if (not gameOver) and startGame:
             for enemy in enemyObjs:
@@ -147,7 +152,7 @@ def game ():
         for i in range(len(enemyObjs) -1, -1, -1):
             enemyRect = pygame.Rect(enemyObjs[i]['x'], enemyObjs[i]['y'],
                 enemyObjs[i]['width'], enemyObjs[i]['height'])
-            if playerRect.colliderect(enemyRect):
+            if collision(enemyRect, playerRect):
                 del enemyObjs[i]
                 playerHealth -= 1
         # set game over if player looses all health
@@ -215,10 +220,10 @@ def game ():
             # create bullet on button press or mouse click
             if (not gameOver) and startGame:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    bulletObjs.append(spawnBullet(playerX, playerY))
-                if event.type == KEYDOWN:
-                    if event.key == K_SPACE:
-                        bulletObjs.append(spawnBullet(playerX, playerY))
+                    bulletObjs.append(spawnBullet(playerCenter))
+                #if event.type == KEYDOWN:
+                    #if event.key == K_SPACE:
+                        #bulletObjs.append(spawnBullet(playerX, playerY))
         # update the window
         pygame.display.update()
         # add tick to FPS_CLOCK
@@ -237,15 +242,27 @@ def spawnEnemy (WINDOW_WIDTH):
     return enemy
 ###########################################################################
 # defines bullet spawn function, takes player x and y
-def spawnBullet (playerX, playerY):
+def spawnBullet (playerCenter):
     bullet = {}
     bullet['width'] = bulletImg.get_width()
     bullet['height'] = bulletImg.get_height()
-    bullet['x'] = playerX + playerWidth
-    bullet['y'] = playerY + (playerHeight/2)
+    bullet['x'] = playerCenter[0]
+    bullet['y'] = playerCenter[1]
     bullet['speed'] = 15
-    bullet['rect'] = pygame.Rect(bullet['x'], bullet['y'],
-        bullet['width'], bullet['height'] )
+    mousePos = pygame.mouse.get_pos()
+    bulletDistX = mousePos[0] - bullet['x']
+    bulletDistY = mousePos[1] - bullet['y']
+    vector = math.sqrt(bulletDistX**2 + bulletDistY**2)
+    bullet['moveX'] = (bulletDistX / vector) * 5
+    bullet['moveY'] = (bulletDistY / vector) * 5
+
+    bullet['angle'] = (360 - ((math.atan2(mousePos[1] - bullet['y'],
+        mousePos[0] - bullet['x']) * 180) / math.pi))
+    bullet['image'] = pygame.transform.rotate(bulletImg, bullet['angle'])
+    bullet['rect'] = bullet['image'].get_rect(center = (bullet['x'],
+        bullet['y']))
+    #bullet['rect'] = pygame.Rect(bullet['x'], bullet['y'],
+        #bullet['width'], bullet['height'] )
     return bullet
 ###########################################################################
 # defines object collision, takes two object rect attributes
