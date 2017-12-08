@@ -1,0 +1,15 @@
+## Game settings ##
+# frames per second the screen updates
+FPS = 60
+# set game window width and height
+WINDOW_WIDTH = 700
+WINDOW_HEIGHT = 700
+# number of enemies to spawn
+NUM_ENEMIES_MIN = 1
+NUM_ENEMIES_MAX = 5
+# player values
+PLAYER_SPEED = 5
+PLAYER_HEALTH_MAX = 3
+# enemy values
+ENEMY_SPEED_MIN = 1
+ENEMY_SPEED_MAX = 5
