@@ -203,10 +203,10 @@ def game ():
         elif gameOver:
             gameOverScreen(score)
         # start game
-        if keys[K_RETURN] and not startGame:
+        if keys[K_q] and not startGame:
             startGame = True
         # restart game after game over
-        if keys[K_RETURN] and gameOver:
+        if keys[K_q] and gameOver:
             playerX = (WINDOW_WIDTH / 2) - (playerWidth / 2)
             playerY = (WINDOW_HEIGHT / 2) - (playerHeight / 2)
             playerHealth = PLAYER_HEALTH_MAX
@@ -297,11 +297,11 @@ def startGameScreen ():
         True, WHITE)
     startRect2 = startText2.get_rect()
     startRect2.center = (WINDOW_WIDTH / 2, (WINDOW_HEIGHT / 2) - 50)
-    startText3 = textFont.render('SPACE key or Mouse Left Click shoots.',
+    startText3 = textFont.render('SPACEBAR key or Mouse Left Click shoots.',
         True, WHITE)
     startRect3 = startText3.get_rect()
     startRect3.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
-    startText4 = textFont.render('Press ENTER to start.', True, WHITE)
+    startText4 = textFont.render('Press Q to start.', True, WHITE)
     startRect4 = startText4.get_rect()
     startRect4.center = (WINDOW_WIDTH / 2, (WINDOW_HEIGHT / 2) + 50)
     window.blit(startText1, startRect1)
@@ -319,7 +319,7 @@ def gameOverScreen (score):
         str(score) + '.'), True, WHITE)
     gameOverRect2 = gameOverText2.get_rect()
     gameOverRect2.center = (WINDOW_WIDTH / 2, (WINDOW_HEIGHT / 2) - 50)
-    gameOverText3 = textFont.render('Press ENTER to restart.', True, WHITE)
+    gameOverText3 = textFont.render('Press Q to restart.', True, WHITE)
     gameOverRect3 = gameOverText3.get_rect()
     gameOverRect3.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
     gameOverText4 = textFont.render('Press ESCAPE to exit.', True, WHITE)
@@ -341,7 +341,7 @@ def scoreScreen (score):
     window.blit(scoreText, scoreRect)
     return
 ###########################################################################
-# definse health text box
+# defines health text box
 def healthScreen (playerHealth):
     healthText = textFontSmall.render(('Health: ' + str(playerHealth)),
         True, WHITE)
